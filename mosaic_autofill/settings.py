@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -19,13 +20,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'removed-from-history-set-DJANGO_SECRET_KEY'
+# Secrets and switches come from the environment, never from the repository:
+#   DJANGO_SECRET_KEY     required in production (a new one: python -c "import secrets; print(secrets.token_urlsafe(50))")
+#   DJANGO_DEBUG          "1" only on a developer's machine; production runs with debug off
+#   DJANGO_ALLOWED_HOSTS  comma separated, e.g. vdzservice.com,www.vdzservice.com
+DEBUG = os.environ.get("DJANGO_DEBUG", "") == "1"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise RuntimeError("Set DJANGO_SECRET_KEY (or DJANGO_DEBUG=1 on a development machine).")
+    SECRET_KEY = "development-only-not-a-secret"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['nightmere33.pythonanywhere.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get(
+    "DJANGO_ALLOWED_HOSTS", "vdzservice.com,www.vdzservice.com,nightmere33.pythonanywhere.com,127.0.0.1,localhost",
+).split(",") if h.strip()]
 
 
 # Application definition

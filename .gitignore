@@ -3,3 +3,13 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Never in the repository: the database (it holds applicants' personal data),
+# virtual environments and local settings.
+db.sqlite3
+*.sqlite3
+vm/
+venv/
+.venv/
+.env
+*.log
